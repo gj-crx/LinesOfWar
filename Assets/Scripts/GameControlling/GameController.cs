@@ -7,4 +7,12 @@ using System.Threading.Tasks;
 public class GameController
 {
 
+
+    public void RecalculateAllTradeRoutes()
+    {
+        foreach (var province in GameManager.dataBase.AllProvinces)
+        {
+            province.GetTradingRoutesSortedList();
+        }
+    }
 }

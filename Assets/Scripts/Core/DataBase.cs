@@ -10,6 +10,7 @@ using UnityEngine;
 public class DataBase
 {
     public ProvincesMapHolder ProvincesMap = new ProvincesMapHolder();
+    public Stack<Waypath> AllProvinces = new Stack<Waypath>();
 
 
 
