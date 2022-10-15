@@ -11,8 +11,17 @@ namespace Economics {
         public float Population;
         public State state;
         public Waypath WaypathOfProvince;
+
+        public float PassageCost = 1;
+
+        public List<Building> Buildings = new List<Building>();
+
         public List<ProductionUnit> productionUnits = new List<ProductionUnit>();
-        public List<ConsumptionNeed> populationNeeds = new List<ConsumptionNeed>();
+
+        public List<ConsumptionNeed> PopulationNeeds = new List<ConsumptionNeed>();
+        public List<ConsumptionNeed> InfrastructureNeeds = new List<ConsumptionNeed>();
+        public List<ConsumptionNeed> ArmyNeeds = new List<ConsumptionNeed>();
+
 
         public float[] ResourcesStored;
         public float[] TotalProduced;
@@ -32,62 +41,94 @@ namespace Economics {
             ProductionToConsumptionRate = new float[GameInfo.Singleton.ResourcesInGame.Count];
         }
 
-        public void InnerProductionCycle()
+        public void Produce()
         {
-            Produce();
-            Consume();
+            TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
+            foreach (ProductionUnit productionUnit in productionUnits)
+            {
+                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * productionUnit.ConsumptionNeedsForProduction.LastProductionMeet * productionUnit.JobsCount;
+            }
+        }
+        public void CalculateNeedsAndProductionRate()
+        {
+            TotalConsumed = new float[GameInfo.Singleton.ResourcesInGame.Count];
+            //consumed by production units
+            foreach (ProductionUnit productionUnit in productionUnits)
+            {
+                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded)
+                {
+                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2;
+                }
+            }
+            //consumed by population
+            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(PopulationNeeds, Population, TotalConsumed);
+            //consumed by Infrastructure
+            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(InfrastructureNeeds, 1, TotalConsumed);
+            //consumed by army
+            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(PopulationNeeds, 1, TotalConsumed);
+
+            ProductionToConsumptionRate = new float[TotalConsumed.Length];
             for (int i = 0; i < ProductionToConsumptionRate.Length; i++) ProductionToConsumptionRate[i] = TotalProduced[i] / TotalConsumed[i];
-            Transport();
         }
-        private void Produce()
+        public void Consume()
         {
-            foreach (ProductionUnit productionUnit in productionUnits)
-            {
-                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * productionUnit.GetConsumptionNeedsModifier() * productionUnit.PopulationNeedToFunction;
-            }
-        }
-        private void Consume()
-        {
-            //Calculating needs fulfillment from the last turn
-            //ñalculating needs of production units
-            foreach (ProductionUnit productionUnit in productionUnits)
-            {
-                foreach (ConsumptionNeed PUNeed in productionUnit.ConsumptionNeedsForProduction)
-                {
-                    float MinimumMeet = 1;
-                    foreach (var ResourcesNeeded in PUNeed.ResourcesToFulfillNeeded)
-                    {
-                        if (ProductionToConsumptionRate[ResourcesNeeded.Item1.ID] < MinimumMeet) MinimumMeet = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
-                    }
-                    PUNeed.LastProductionMeet = MinimumMeet;
-                }
-            }
-            //calculation needs of population
-            foreach (ConsumptionNeed PopNeed in populationNeeds)
-            {
-                float MinimumMeet = 1;
-                foreach (var ResourcesNeeded in PopNeed.ResourcesToFulfillNeeded)
-                {
-                    if (ProductionToConsumptionRate[ResourcesNeeded.Item1.ID] < MinimumMeet) MinimumMeet = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
-                }
-                PopNeed.LastProductionMeet = MinimumMeet;
-            }
+            //to be worked on
 
-            //calculating actual resources needs of this turn
+            //------- Production
             foreach (ProductionUnit productionUnit in productionUnits)
-            {
-                foreach (ConsumptionNeed PUNeed in productionUnit.ConsumptionNeedsForProduction)
-                {
-                    foreach (var ResourcesNeeded in PUNeed.ResourcesToFulfillNeeded)
-                    {
-                        TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2 * productionUnit.PopulationNeedToFunction / productionUnit.ConsumptionNeedsForProduction.Count;
-                    }
+            { //getting average fulfillment of required resources
+                float TotalResourcesNeed = 0;
+                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded)
+                { 
+                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
                 }
+                productionUnit.ConsumptionNeedsForProduction.LastProductionMeet = TotalResourcesNeed / productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded.Count;
+            }
+            //-------
+
+
+            //------- Population
+            foreach (ConsumptionNeed Need in PopulationNeeds)
+            { //getting average fulfillment of required resources
+                float TotalResourcesNeed = 0;
+                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                {
+                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                }
+                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
+            }
+            //-------
+
+
+            //------- Infrastructure
+            foreach (ConsumptionNeed Need in InfrastructureNeeds)
+            { //getting average fulfillment of required resources
+                float TotalResourcesNeed = 0;
+                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                {
+                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                }
+                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
+            }
+            //-------
+
+
+            //------- Army
+            foreach (ConsumptionNeed Need in ArmyNeeds)
+            { //getting average fulfillment of required resources
+                float TotalResourcesNeed = 0;
+                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                {
+                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                }
+                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
             }
         }
-        private void Transport()
+        public void Transport()
         { //bases on local production balance, tries to exports every resource with positive balance to nearest provinces
-
+            
         }
+
+        
     }
 }

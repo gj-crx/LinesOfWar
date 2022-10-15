@@ -15,6 +15,8 @@ namespace UI
         public Text text_Population;
         public Text text_ArmyStrength;
 
+        public Image[] NeedsFillers = new Image[4];
+
 
 
         public void ShowProvinceInfo(Province ProvinceToShow)
@@ -28,6 +30,45 @@ namespace UI
 
             text_Population.text = UIManager.GetBasePartOfText(text_Population.text) + ProvinceToShow.Population.ToString();
             text_ArmyStrength.text = UIManager.GetBasePartOfText(text_ArmyStrength.text) + "?";
+
+            ShowEveryNeed(ProvinceToShow);
+        }
+
+
+        private void ShowEveryNeed(Province ProvinceToShow)
+        {
+            //population needs
+            float CurrentNeedsSum = 0;
+            int CurrentNeedsCount = 0;
+            foreach (var Need in ProvinceToShow.PopulationNeeds)
+            {
+                CurrentNeedsCount++;
+                CurrentNeedsSum += Need.LastProductionMeet;
+            }
+            NeedsFillers[0].fillAmount = CurrentNeedsSum / CurrentNeedsCount;
+
+            //production needs
+            CurrentNeedsSum = 0;
+            CurrentNeedsCount = 0;
+            foreach (var ProductionUnit in ProvinceToShow.productionUnits)
+            {
+                CurrentNeedsCount++;
+                CurrentNeedsSum += ProductionUnit.ConsumptionNeedsForProduction.LastProductionMeet;
+            }
+            NeedsFillers[1].fillAmount = CurrentNeedsSum / CurrentNeedsCount;
+
+            //infrastructure needs
+            CurrentNeedsSum = 0;
+            CurrentNeedsCount = 0;
+            foreach (var building in ProvinceToShow.Buildings)
+            {
+                CurrentNeedsCount++;
+                CurrentNeedsSum += building.MaintainNeed.LastProductionMeet;
+            }
+            NeedsFillers[2].fillAmount = CurrentNeedsSum / CurrentNeedsCount;
+
+            //army needs
+            NeedsFillers[3].fillAmount = 1;
         }
     }
 }

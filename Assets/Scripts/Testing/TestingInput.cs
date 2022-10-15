@@ -41,7 +41,7 @@ public class TestingInput : MonoBehaviour
             lastpath = GameManager.dataBase.ProvincesMap[TargetPos.x, TargetPos.y];
             foreach (var v in lastpath.NeigbourPaths)
             {
-                Debug.Log("Selected prov " + v.Item1.province.Position + GameManager.dataBase.ProvincesMap[TargetPos.x, TargetPos.y].LandTypeOfPath);
+                Debug.Log("Selected prov " + v.province.Position + GameManager.dataBase.ProvincesMap[TargetPos.x, TargetPos.y].LandTypeOfPath);
             }
         }
     }

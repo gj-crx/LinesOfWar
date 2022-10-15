@@ -10,7 +10,7 @@ public class GameInfo : MonoBehaviour
     private int Framelimit = 60;
     [HideInInspector]
     public static GameInfo Singleton;
-    public List<Resources> ResourcesInGame = new List<Resources>();
+    public List<Resource> ResourcesInGame = new List<Resource>();
     public Tile[] TilesOfLandTypes = new Tile[6];
 
 
@@ -22,15 +22,10 @@ public class GameInfo : MonoBehaviour
     {
         Singleton = this;
         Application.targetFrameRate = Framelimit;
-        GameInit();
+        GameManager.GameInit();
     }
 
 
-    private static void GameInit()
-    {
-        GameManager.map = new Map(GameInfo.Singleton.tilemap);
-        GameManager.Pathfinding = new WaypointPathfinding(GameManager.map);
-        GameManager.mapGenerator = new MapGenerator(GameManager.map, GameInfo.Singleton.tilemap);
-    }
+    
 
 }

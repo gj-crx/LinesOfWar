@@ -19,5 +19,25 @@ namespace Economics
 
         public List<Tuple<Resource, float>> ResourcesToFulfillNeeded = new List<Tuple<Resource, float>>();
 
+
+        public static float[] CalculateConsumptionAmount(List<ConsumptionNeed> NeedsList, float UsersAmount, float[] ResourcesToDistract)
+        {
+            foreach (var Need in NeedsList)
+            {
+                foreach (var resource in Need.ResourcesToFulfillNeeded)
+                {
+                    ResourcesToDistract[resource.Item1.ID] -= resource.Item2 * UsersAmount;
+                }
+            }
+            return ResourcesToDistract;
+        }
+
+        public enum CategoryOfNeed : byte
+        {
+            PopulationNeed = 0,
+            ProductionNeed = 1,
+            InfrastructureNeed = 2,
+            ArmyNeed = 3
+        }
     }
 }

@@ -7,7 +7,6 @@ using UnityEngine.Tilemaps;
 public class Map
 {
     public Tilemap tileMap;
-    public Stack<Waypath> AllWaypaths = new Stack<Waypath>();
 
     [SerializeField]
     private Vector3Int tileMapBounds1 = new Vector3Int(200, 200, 0);
@@ -20,7 +19,7 @@ public class Map
 
     public void ClearWaypointsDistances()
     {
-        foreach (var waypath in AllWaypaths)
+        foreach (var waypath in GameManager.dataBase.AllProvinces)
         {
             waypath.CurrentDistance = 0;
             waypath.Marked = false;

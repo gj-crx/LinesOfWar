@@ -53,10 +53,10 @@ public class WaypointPathfinding
                 path.Marked = true;
                 foreach (var NeibPath in path.NeigbourPaths)
                 {
-                    if (NeibPath != null && NeibPath.Item1 != null && ValidWaypoint(NeibPath.Item1))
+                    if (NeibPath != null && NeibPath != null && ValidWaypoint(NeibPath))
                     {
-                        if (NeibPath.Item1 == TargetPath) FoundTarget = true;
-                        else NextPathsGroups[NextGroup].Push(NeibPath.Item1);
+                        if (NeibPath == TargetPath) FoundTarget = true;
+                        else NextPathsGroups[NextGroup].Push(NeibPath);
                     }
                     if (FoundTarget) break;
                 }
@@ -93,10 +93,10 @@ public class WaypointPathfinding
             float CurrentMinDistance = 10000;
             foreach (var CurrentNeib in CurrentPath.NeigbourPaths)
             {
-                if (CurrentNeib != null && CurrentNeib.Item1.Marked && CurrentNeib.Item1.CurrentDistance < CurrentMinDistance)
+                if (CurrentNeib != null && CurrentNeib.Marked && CurrentNeib.CurrentDistance < CurrentMinDistance)
                 {
-                    CurrentMinDistance = CurrentNeib.Item1.CurrentDistance;
-                    MinimalDistancePath = CurrentNeib.Item1;
+                    CurrentMinDistance = CurrentNeib.CurrentDistance;
+                    MinimalDistancePath = CurrentNeib;
                 }
             }
             Way.Add(CurrentPath);

@@ -11,7 +11,7 @@ public class Waypath
     /// <summary>
     /// Contains information about neigbhour provinces and the travel cost to them
     /// </summary>
-    public List<Tuple<Waypath, float>> NeigbourPaths = new List<Tuple<Waypath, float>>();
+    public List<Waypath> NeigbourPaths = new List<Waypath>();
     public List<Tuple<Waypath, float>> AviableTradingProvinces = new List<Tuple<Waypath, float>>();
 
     public float CurrentDistance = 0;
@@ -26,11 +26,11 @@ public class Waypath
     {
         foreach (var Neib in NeigbourPaths)
         {
-            foreach (var NeibOfNeib in Neib.Item1.NeigbourPaths)
+            foreach (var NeibOfNeib in Neib.NeigbourPaths)
             {
-                if (NeibOfNeib.Item1 == this)
+                if (NeibOfNeib == this)
                 {
-                    Neib.Item1.NeigbourPaths[Neib.Item1.NeigbourPaths.IndexOf(NeibOfNeib)] = new Tuple<Waypath, float>(NeibOfNeib.Item1, NewValue);
+                    Neib.NeigbourPaths[Neib.NeigbourPaths.IndexOf(NeibOfNeib)] = NeibOfNeib;
                 }
                 return;
             }
@@ -39,54 +39,68 @@ public class Waypath
 
     public void CalculateNeigbhours(DataBase.ProvincesMapHolder provincesMapHolder)
     {
-        NeigbourPaths = new List<Tuple<Waypath, float>>();
+        NeigbourPaths = new List<Waypath>();
 
         if (provincesMapHolder[province.Position.x + 0, province.Position.y + 1] != null)
-            NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x + 0, province.Position.y + 1], 1));
+            NeigbourPaths.Add(provincesMapHolder[province.Position.x + 0, province.Position.y + 1]);
 
         if ((float)province.Position.y / 2 == province.Position.y / 2)
         {
             if (provincesMapHolder[province.Position.x - 1, province.Position.y + 1] != null)
-                NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x - 1, province.Position.y + 1], 1));
+                NeigbourPaths.Add(provincesMapHolder[province.Position.x - 1, province.Position.y + 1]);
         }
         else
         {
             if (provincesMapHolder[province.Position.x + 1, province.Position.y + 1] != null)
-                NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x + 1, province.Position.y + 1], 1));
+                NeigbourPaths.Add(provincesMapHolder[province.Position.x + 1, province.Position.y + 1]);
         }
 
         if (provincesMapHolder[province.Position.x + 1, province.Position.y + 0] != null)
-            NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x + 1, province.Position.y + 0], 1));
+            NeigbourPaths.Add(provincesMapHolder[province.Position.x + 1, province.Position.y + 0]);
         if (provincesMapHolder[province.Position.x - 1, province.Position.y + 0] != null)
-            NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x - 1, province.Position.y + 0], 1));
+            NeigbourPaths.Add(provincesMapHolder[province.Position.x - 1, province.Position.y + 0]);
 
         if (provincesMapHolder[province.Position.x + 0, province.Position.y - 1] != null)
-            NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x + 0, province.Position.y - 1], 1));
+            NeigbourPaths.Add(provincesMapHolder[province.Position.x + 0, province.Position.y - 1]);
 
         if ((float)province.Position.y / 2 == province.Position.y / 2)
         {
             if (provincesMapHolder[province.Position.x - 1, province.Position.y - 1] != null)
-                NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x - 1, province.Position.y - 1], 1));
+                NeigbourPaths.Add(provincesMapHolder[province.Position.x - 1, province.Position.y - 1]);
         }
         else
         {
             if (provincesMapHolder[province.Position.x + 1, province.Position.y - 1] != null)
-                NeigbourPaths.Add(new Tuple<Waypath, float>(provincesMapHolder[province.Position.x + 1, province.Position.y - 1], 1));
+                NeigbourPaths.Add(provincesMapHolder[province.Position.x + 1, province.Position.y - 1]);
         }
     }
-    public List<Waypath> GetTradingRoutesSortedList()
+    /// <summary>
+    /// Only for pathfinding thread
+    /// </summary>
+    public void GetTradingRoutesSortedList()
     {
+        if (System.Threading.Thread.CurrentThread != GameManager.controller.PathfindingThread) { Debug.LogError("Function called from incorrect thread"); return; }
+        GameManager.map.ClearWaypointsDistances();
+
         AviableTradingProvinces = new List<Tuple<Waypath, float>>();
         Queue<Waypath> CheckedList = new Queue<Waypath>();
+        Stack<Waypath> MarkedList = new Stack<Waypath>();
         CheckedList.Enqueue(this);
-        while (true)
+        this.CurrentDistance = 0;
+        while (CheckedList.Count > 0)
         {
             Waypath CurrentPath = CheckedList.Dequeue();
             foreach (var path in CurrentPath.NeigbourPaths)
             {
-                if (AviableTradingProvinces.Contains(path) == false && (province.state == null || province.state.TradingEnabledWith.Contains(path.Item1.province.state.ID)))
-                    AviableTradingProvinces.Add(path);
+                if (MarkedList.Contains(path) == false && (province.state == null || province.state.TradingEnabledWith.Contains(path.province.state.ID)))
+                {
+                    path.CurrentDistance = CurrentPath.CurrentDistance + path.province.PassageCost;
+                    AviableTradingProvinces.Add(new Tuple<Waypath, float>(path, CurrentPath.CurrentDistance + path.province.PassageCost));
+                    CheckedList.Enqueue(path);
+                    MarkedList.Push(path);
+                }
             }
         }
+        AviableTradingProvinces.Sort();
     }
 }
