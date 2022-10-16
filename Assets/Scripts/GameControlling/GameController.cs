@@ -14,7 +14,7 @@ namespace GameCore
 
         public void StartGameControlling()
         {
-
+            RecalculateAllTradeRoutes();
         }
 
 
@@ -24,6 +24,7 @@ namespace GameCore
             {
                 province.GetTradingRoutesSortedList();
             }
+            Debug.Log("recalculation of trading ways complete");
         }
 
         public void ControlEconomy()

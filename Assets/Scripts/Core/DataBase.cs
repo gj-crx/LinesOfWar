@@ -7,6 +7,7 @@ using UnityEngine;
 /// <summary>
 /// Contains all dynamic game data
 /// </summary>
+[Serializable]
 public class DataBase
 {
     public ProvincesMapHolder ProvincesMap = new ProvincesMapHolder();

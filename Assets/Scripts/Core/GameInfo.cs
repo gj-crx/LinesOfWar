@@ -13,6 +13,8 @@ public class GameInfo : MonoBehaviour
     public List<Resource> ResourcesInGame = new List<Resource>();
     public Tile[] TilesOfLandTypes = new Tile[6];
 
+    public DataBase dataBaseToTest;
+
 
     public Tilemap tilemap;
 

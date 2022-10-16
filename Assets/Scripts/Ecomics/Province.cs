@@ -72,8 +72,6 @@ namespace Economics {
         }
         public void Consume()
         {
-            //to be worked on
-
             //------- Production
             foreach (ProductionUnit productionUnit in productionUnits)
             { //getting average fulfillment of required resources
@@ -126,7 +124,33 @@ namespace Economics {
         }
         public void Transport()
         { //bases on local production balance, tries to exports every resource with positive balance to nearest provinces
-            
+            for (int i = 0; i < TotalProduced.Length; i++)
+            {
+                float ExcessAmount = TotalProduced[i] - TotalConsumed[i];
+                if (ExcessAmount > 0)
+                { //excess amounts of resources should be transfered where it's actually needed
+                    int CurrentTransportationID = WaypathOfProvince.AviableTradingProvinces.Count - 1;
+                    while (ExcessAmount > 0)
+                    {
+                        Province CurrentTargetToTransport = WaypathOfProvince.AviableTradingProvinces[CurrentTransportationID].Item1.province;
+                        if (CurrentTargetToTransport.ProductionToConsumptionRate[i] < 1)
+                        { //shortage detected
+                            float ShortageAmount = CurrentTargetToTransport.TotalConsumed[i] - CurrentTargetToTransport.TotalProduced[i];
+                            if (ShortageAmount > ExcessAmount)
+                            { //shortage partially fulfilled, transportation of this resource ends here
+                                CurrentTargetToTransport.TotalProduced[i] += ExcessAmount;
+                                ExcessAmount = 0;
+                            }
+                            else
+                            { //shortage fulfilled
+                                CurrentTargetToTransport.TotalProduced[i] += ShortageAmount;
+                                ExcessAmount -= ShortageAmount;
+                            }
+                            
+                        }
+                    }
+                }
+            }
         }
 
         

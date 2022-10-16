@@ -27,6 +27,11 @@ public static class GameManager
         map = new Map(GameInfo.Singleton.tilemap);
         Pathfinding = new WaypointPathfinding(map);
         mapGenerator = new MapGenerator(map, GameInfo.Singleton.tilemap);
+        controller = new GameController();
+
+
+        GameInfo.Singleton.dataBaseToTest = dataBase;
+        controller.StartGameControlling();
 
     }
 }

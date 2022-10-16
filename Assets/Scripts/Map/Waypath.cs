@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+[Serializable]
 public class Waypath
 {
+
     public Map.LandType LandTypeOfPath = Map.LandType.Plains;
     public readonly Economics.Province province;
     /// <summary>
@@ -79,20 +81,22 @@ public class Waypath
     /// </summary>
     public void GetTradingRoutesSortedList()
     {
-        if (System.Threading.Thread.CurrentThread != GameManager.controller.PathfindingThread) { Debug.LogError("Function called from incorrect thread"); return; }
+       // if (System.Threading.Thread.CurrentThread != GameManager.controller.PathfindingThread) { Debug.LogError("Function called from incorrect thread"); return; }
         GameManager.map.ClearWaypointsDistances();
 
         AviableTradingProvinces = new List<Tuple<Waypath, float>>();
         Queue<Waypath> CheckedList = new Queue<Waypath>();
         Stack<Waypath> MarkedList = new Stack<Waypath>();
         CheckedList.Enqueue(this);
+        MarkedList.Push(this);
         this.CurrentDistance = 0;
         while (CheckedList.Count > 0)
         {
             Waypath CurrentPath = CheckedList.Dequeue();
             foreach (var path in CurrentPath.NeigbourPaths)
             {
-                if (MarkedList.Contains(path) == false && (province.state == null || province.state.TradingEnabledWith.Contains(path.province.state.ID)))
+                if (MarkedList.Contains(path) == false && GameManager.Pathfinding.CurrentEnabledLandTypesToTravel.Contains(path.LandTypeOfPath)
+                    && (province.state == null || province.state.TradingEnabledWith.Contains(path.province.state.ID)))
                 {
                     path.CurrentDistance = CurrentPath.CurrentDistance + path.province.PassageCost;
                     AviableTradingProvinces.Add(new Tuple<Waypath, float>(path, CurrentPath.CurrentDistance + path.province.PassageCost));
@@ -101,6 +105,6 @@ public class Waypath
                 }
             }
         }
-        AviableTradingProvinces.Sort();
+        AviableTradingProvinces.Sort((x, y) => y.Item2.CompareTo(x.Item2));
     }
 }
