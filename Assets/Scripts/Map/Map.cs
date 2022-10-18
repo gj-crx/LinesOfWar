@@ -19,7 +19,7 @@ public class Map
 
     public void ClearWaypointsDistances()
     {
-        foreach (var waypath in GameManager.dataBase.AllProvinces)
+        foreach (var waypath in GameManager.dataBase.AllPaths)
         {
             waypath.CurrentDistance = 0;
             waypath.Marked = false;

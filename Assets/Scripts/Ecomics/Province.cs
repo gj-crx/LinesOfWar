@@ -5,6 +5,7 @@ using States;
 using System;
 
 namespace Economics {
+    [System.Serializable]
     public class Province
     {
         public Vector3Int Position;
@@ -39,6 +40,8 @@ namespace Economics {
             TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
             TotalConsumed = new float[GameInfo.Singleton.ResourcesInGame.Count];
             ProductionToConsumptionRate = new float[GameInfo.Singleton.ResourcesInGame.Count];
+
+            GameManager.dataBase.ShowProvinceInInspector(this);
         }
 
         public void Produce()
@@ -46,7 +49,7 @@ namespace Economics {
             TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
             foreach (ProductionUnit productionUnit in productionUnits)
             {
-                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * productionUnit.ConsumptionNeedsForProduction.LastProductionMeet * productionUnit.JobsCount;
+                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * productionUnit.ConsumptionNeedForProduction.LastProductionMeet * productionUnit.JobsCount;
             }
         }
         public void CalculateNeedsAndProductionRate()
@@ -55,9 +58,9 @@ namespace Economics {
             //consumed by production units
             foreach (ProductionUnit productionUnit in productionUnits)
             {
-                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded)
+                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
                 {
-                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2;
+                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2; //production units currently doesn't depend on population to consume resources
                 }
             }
             //consumed by population
@@ -76,11 +79,11 @@ namespace Economics {
             foreach (ProductionUnit productionUnit in productionUnits)
             { //getting average fulfillment of required resources
                 float TotalResourcesNeed = 0;
-                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded)
+                foreach (var resource in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
                 { 
-                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                    TotalResourcesNeed = ProductionToConsumptionRate[resource.Item1.ID];
                 }
-                productionUnit.ConsumptionNeedsForProduction.LastProductionMeet = TotalResourcesNeed / productionUnit.ConsumptionNeedsForProduction.ResourcesToFulfillNeeded.Count;
+                productionUnit.ConsumptionNeedForProduction.LastProductionMeet = TotalResourcesNeed / productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded.Count;
             }
             //-------
 

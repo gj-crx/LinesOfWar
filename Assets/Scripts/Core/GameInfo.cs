@@ -6,6 +6,7 @@ using Economics;
 
 public class GameInfo : MonoBehaviour
 {
+    public Types GameTypesPreset;
     [SerializeField]
     private int Framelimit = 60;
     [HideInInspector]
@@ -14,7 +15,6 @@ public class GameInfo : MonoBehaviour
     public Tile[] TilesOfLandTypes = new Tile[6];
 
     public DataBase dataBaseToTest;
-
 
     public Tilemap tilemap;
 
@@ -28,6 +28,13 @@ public class GameInfo : MonoBehaviour
     }
 
 
-    
+    private void OnApplicationQuit()
+    {
+        GameManager.GameStillRunning = false;
+    }
+    private void OnApplicationFocus(bool focus)
+    {
+        GameManager.GameIsPaused = focus;
+    }
 
 }

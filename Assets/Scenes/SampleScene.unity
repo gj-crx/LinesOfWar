@@ -3527,7 +3527,66 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bc82b6a42e63614e82567cd64f0a2d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameTypesPreset:
+    ResourceTypes:
+    - ID: 0
+      ResourceName: Grain
+      BasicProductionModifier: 1
+    - ID: 1
+      ResourceName: Wood
+      BasicProductionModifier: 1
+    - ID: 2
+      ResourceName: Iron ore
+      BasicProductionModifier: 2
+    - ID: 3
+      ResourceName: Steel
+      BasicProductionModifier: 1
+    - ID: 4
+      ResourceName: Crafted goods
+      BasicProductionModifier: 1
+    BuildingTypes: []
+    ProductionUnitTypes:
+    - ProductionUnitName: Farmlands
+      JobsCount: 1000
+      ProductivityModifier: 1
+      ProducedResource:
+        ID: 0
+        ResourceName: 
+        BasicProductionModifier: 0
+      ConsumptionNeedForProduction:
+        NeedName: 
+        LastProductionMeet: 0
+        resourcesToFulfillNeededInspectorBuilder: []
+        resourcesToFulfillAmountInspectorBuilder: []
+      producedResourceName: Grain
+      PossibleLandTypesToGenerate: 000203
+      ChancesToGenerateInLandType:
+      - 0.75
+      - 0.4
+      - 0.15
   Framelimit: 60
+  ResourcesInGame:
+  - ID: 0
+    ResourceName: Grain
+    BasicProductionModifier: 1
+  - ID: 1
+    ResourceName: Wood
+    BasicProductionModifier: 1
+  - ID: 2
+    ResourceName: Iron ore
+    BasicProductionModifier: 2
+  - ID: 3
+    ResourceName: Steel
+    BasicProductionModifier: 1
+  - ID: 4
+    ResourceName: Crafted goods
+    BasicProductionModifier: 1
+  - ID: 5
+    ResourceName: Tools
+    BasicProductionModifier: 1
+  - ID: 6
+    ResourceName: Weapons
+    BasicProductionModifier: 1
   TilesOfLandTypes:
   - {fileID: 11400000, guid: 71b80c7a431908d4ab5e16412b11a975, type: 2}
   - {fileID: 11400000, guid: 946a2f09edec3034fbc62de22882abc1, type: 2}
@@ -3535,6 +3594,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  dataBaseToTest:
+    AllProvinces: []
   tilemap: {fileID: 1200367255}
 --- !u!4 &1930373907
 Transform:

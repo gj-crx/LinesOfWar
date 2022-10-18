@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Economics;
 
 
 /// <summary>
@@ -11,13 +12,20 @@ using UnityEngine;
 public class DataBase
 {
     public ProvincesMapHolder ProvincesMap = new ProvincesMapHolder();
-    public Stack<Waypath> AllProvinces = new Stack<Waypath>();
+    public Stack<Waypath> AllPaths = new Stack<Waypath>();
+
+    [SerializeField]
+    private List<Province> AllProvinces = new List<Province>();
 
 
 
 
 
 
+    public void ShowProvinceInInspector(Province province)
+    {
+        AllProvinces.Add(province);
+    }
 
 
 

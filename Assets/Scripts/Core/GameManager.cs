@@ -7,7 +7,11 @@ using Economics;
 
 public static class GameManager
 {
+    public static bool GameStillRunning = true;
+    public static bool GameIsPaused = false;
+
     public static DataBase dataBase;
+    public static Types types;
     public static GameController controller;
     public static WaypointPathfinding Pathfinding;
     public static Map map;
@@ -24,6 +28,7 @@ public static class GameManager
         else IsAlreadyInited = true;
 
         dataBase = new DataBase();
+        types = new Types();
         map = new Map(GameInfo.Singleton.tilemap);
         Pathfinding = new WaypointPathfinding(map);
         mapGenerator = new MapGenerator(map, GameInfo.Singleton.tilemap);
@@ -31,6 +36,7 @@ public static class GameManager
 
 
         GameInfo.Singleton.dataBaseToTest = dataBase;
+        GameInfo.Singleton.GameTypesPreset = types;
         controller.StartGameControlling();
 
     }

@@ -53,7 +53,7 @@ namespace UI
             foreach (var ProductionUnit in ProvinceToShow.productionUnits)
             {
                 CurrentNeedsCount++;
-                CurrentNeedsSum += ProductionUnit.ConsumptionNeedsForProduction.LastProductionMeet;
+                CurrentNeedsSum += ProductionUnit.ConsumptionNeedForProduction.LastProductionMeet;
             }
             NeedsFillers[1].fillAmount = CurrentNeedsSum / CurrentNeedsCount;
 

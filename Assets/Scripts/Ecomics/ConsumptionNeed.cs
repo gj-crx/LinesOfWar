@@ -8,6 +8,7 @@ namespace Economics
     /// <summary>
     /// Represent a need of certain resources for population / industry / logistics / army
     /// </summary>
+    [System.Serializable]
     public class ConsumptionNeed
     { 
         public string NeedName = "Food";
@@ -19,14 +20,27 @@ namespace Economics
 
         public List<Tuple<Resource, float>> ResourcesToFulfillNeeded = new List<Tuple<Resource, float>>();
 
+        [SerializeField]
+        private List<string> resourcesToFulfillNeededInspectorBuilder = new List<string>();
+        [SerializeField]
+        private List<float> resourcesToFulfillAmountInspectorBuilder = new List<float>();
+
+
+        public ConsumptionNeed()
+        {
+            for (int i = 0; i < resourcesToFulfillNeededInspectorBuilder.Count; i++)
+            {
+                ResourcesToFulfillNeeded.Add(new Tuple<Resource, float>(GameManager.types.GetResourceTypeByName(resourcesToFulfillNeededInspectorBuilder[i]), resourcesToFulfillAmountInspectorBuilder[i]));
+            }
+        }
 
         public static float[] CalculateConsumptionAmount(List<ConsumptionNeed> NeedsList, float UsersAmount, float[] ResourcesToDistract)
         {
             foreach (var Need in NeedsList)
             {
-                foreach (var resource in Need.ResourcesToFulfillNeeded)
+                foreach (var Resource in Need.ResourcesToFulfillNeeded)
                 {
-                    ResourcesToDistract[resource.Item1.ID] -= resource.Item2 * UsersAmount;
+                    ResourcesToDistract[Resource.Item1.ID] -= Resource.Item2 * UsersAmount;
                 }
             }
             return ResourcesToDistract;
