@@ -3554,10 +3554,12 @@ MonoBehaviour:
         ResourceName: 
         BasicProductionModifier: 0
       ConsumptionNeedForProduction:
-        NeedName: 
-        LastProductionMeet: 0
-        resourcesToFulfillNeededInspectorBuilder: []
-        resourcesToFulfillAmountInspectorBuilder: []
+        NeedName: Simpe agricultural expences
+        LastProductionMeet: 1
+        resourcesToFulfillNeededInspectorBuilder:
+        - Wood
+        resourcesToFulfillAmountInspectorBuilder:
+        - 0.2
       producedResourceName: Grain
       PossibleLandTypesToGenerate: 000203
       ChancesToGenerateInLandType:

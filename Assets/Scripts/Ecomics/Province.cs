@@ -49,7 +49,9 @@ namespace Economics {
             TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
             foreach (ProductionUnit productionUnit in productionUnits)
             {
-                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * productionUnit.ConsumptionNeedForProduction.LastProductionMeet * productionUnit.JobsCount;
+                //in order to work for 100% power production unit needed to have maximum power 
+                float ProductionPowerModifier = Mathf.Min(productionUnit.ConsumptionNeedForProduction.LastProductionMeet, productionUnit.CurrentWorkers / productionUnit.MaximumWorkers);
+                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * ProductionPowerModifier;
             }
         }
         public void CalculateNeedsAndProductionRate()
@@ -60,7 +62,7 @@ namespace Economics {
             {
                 foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
                 {
-                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2; //production units currently doesn't depend on population to consume resources
+                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2 * productionUnit.CurrentWorkers;
                 }
             }
             //consumed by population

@@ -8,7 +8,8 @@ namespace Economics
     public class ProductionUnit
     {
         public string ProductionUnitName = "Farmlands";
-        public float JobsCount = 1000;
+        public float MaximumWorkers = 1000;
+        public float CurrentWorkers = 0;
         public float ProductivityModifier = 1;
 
         [HideInInspector]
