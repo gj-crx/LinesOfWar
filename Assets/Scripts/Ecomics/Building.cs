@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace Economics{
     [System.Serializable]
-    public class Building
+    [CreateAssetMenu(fileName = "Building", menuName = "ScriptableObjects/Building", order = 2)]
+    public class Building : ScriptableObject
     {
         public string BuildingName = "Paved road";
         public ConsumptionNeed MaintainNeed = null;

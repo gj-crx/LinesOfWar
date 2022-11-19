@@ -24,10 +24,10 @@ namespace Economics {
         public List<ConsumptionNeed> ArmyNeeds = new List<ConsumptionNeed>();
 
 
-        public float[] ResourcesStored;
-        public float[] TotalProduced;
-        public float[] TotalConsumed;
-        public float[] ProductionToConsumptionRate;
+        public ResourcesStorage ResourcesStored = new ResourcesStorage();
+        public ResourcesStorage TotalProduced;
+        public ResourcesStorage TotalConsumed;
+        public ResourcesStorage ProductionToConsumptionRate;
 
         public Province(Vector3Int Position, State state, Waypath WaypathOfProvince)
         {
@@ -35,83 +35,75 @@ namespace Economics {
             this.state = state;
             this.WaypathOfProvince = WaypathOfProvince;
 
-
-            ResourcesStored = new float[GameInfo.Singleton.ResourcesInGame.Count];
-            TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
-            TotalConsumed = new float[GameInfo.Singleton.ResourcesInGame.Count];
-            ProductionToConsumptionRate = new float[GameInfo.Singleton.ResourcesInGame.Count];
-
             GameManager.dataBase.ShowProvinceInInspector(this);
         }
 
         public void Produce()
         {
-            TotalProduced = new float[GameInfo.Singleton.ResourcesInGame.Count];
+            TotalProduced = new ResourcesStorage();
             foreach (ProductionUnit productionUnit in productionUnits)
-            {
-                //in order to work for 100% power production unit needed to have maximum power 
+            {   //in order to work for 100% power production unit needed to have maximum power 
                 float ProductionPowerModifier = Mathf.Min(productionUnit.ConsumptionNeedForProduction.LastProductionMeet, productionUnit.CurrentWorkers / productionUnit.MaximumWorkers);
-                TotalProduced[productionUnit.ProducedResource.ID] += productionUnit.ProductivityModifier * ProductionPowerModifier;
+                TotalProduced.Add(productionUnit.ProducedResource, productionUnit.ProductivityModifier * ProductionPowerModifier);
             }
         }
         public void CalculateNeedsAndProductionRate()
         {
-            TotalConsumed = new float[GameInfo.Singleton.ResourcesInGame.Count];
+            TotalConsumed = new ResourcesStorage();
             //consumed by production units
             foreach (ProductionUnit productionUnit in productionUnits)
             {
-                foreach (var ResourcesNeeded in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
+                foreach (var resourcesNeeded in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
                 {
-                    TotalConsumed[ResourcesNeeded.Item1.ID] -= ResourcesNeeded.Item2 * productionUnit.CurrentWorkers;
+                    TotalConsumed.Add(resourcesNeeded.NeededResource, resourcesNeeded.Amount * productionUnit.CurrentWorkers);
                 }
             }
             //consumed by population
-            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(PopulationNeeds, Population, TotalConsumed);
+            ConsumptionNeed.SubstractListOfNeeds(PopulationNeeds, Population, TotalConsumed);
             //consumed by Infrastructure
-            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(InfrastructureNeeds, 1, TotalConsumed);
+            ConsumptionNeed.SubstractListOfNeeds(InfrastructureNeeds, 1, TotalConsumed);
             //consumed by army
-            TotalConsumed = ConsumptionNeed.CalculateConsumptionAmount(PopulationNeeds, 1, TotalConsumed);
-
-            ProductionToConsumptionRate = new float[TotalConsumed.Length];
-            for (int i = 0; i < ProductionToConsumptionRate.Length; i++) ProductionToConsumptionRate[i] = TotalProduced[i] / TotalConsumed[i];
+            ConsumptionNeed.SubstractListOfNeeds(PopulationNeeds, 1, TotalConsumed);
+            //finalizing with production rate to be used in transportation
+            ProductionToConsumptionRate = TotalProduced.GetProductionRate(TotalConsumed);
         }
         public void Consume()
         {
-            //------- Production
+            //------- Production consumption
             foreach (ProductionUnit productionUnit in productionUnits)
             { //getting average fulfillment of required resources
-                float TotalResourcesNeed = 0;
+                float TotalResourcesFulfillmentRate = 0;
                 foreach (var resource in productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded)
                 { 
-                    TotalResourcesNeed = ProductionToConsumptionRate[resource.Item1.ID];
+                    TotalResourcesFulfillmentRate += ProductionToConsumptionRate.FindStoredResource(resource.NeededResource).Amount;
                 }
-                productionUnit.ConsumptionNeedForProduction.LastProductionMeet = TotalResourcesNeed / productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded.Count;
+                productionUnit.ConsumptionNeedForProduction.LastProductionMeet = TotalResourcesFulfillmentRate / productionUnit.ConsumptionNeedForProduction.ResourcesToFulfillNeeded.Count;
             }
             //-------
 
 
-            //------- Population
+            //------- Population consumption
             foreach (ConsumptionNeed Need in PopulationNeeds)
             { //getting average fulfillment of required resources
-                float TotalResourcesNeed = 0;
-                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                float TotalResourcesFulfillmentRate = 0;
+                foreach (var resource in Need.ResourcesToFulfillNeeded)
                 {
-                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                    TotalResourcesFulfillmentRate += ProductionToConsumptionRate.FindStoredResource(resource.NeededResource).Amount;
                 }
-                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
+                Need.LastProductionMeet = TotalResourcesFulfillmentRate / Need.ResourcesToFulfillNeeded.Count;
             }
             //-------
 
 
-            //------- Infrastructure
+            //------- Infrastructure consumption
             foreach (ConsumptionNeed Need in InfrastructureNeeds)
             { //getting average fulfillment of required resources
-                float TotalResourcesNeed = 0;
-                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                float TotalResourcesFulfillmentRate = 0;
+                foreach (var resource in Need.ResourcesToFulfillNeeded)
                 {
-                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                    TotalResourcesFulfillmentRate += ProductionToConsumptionRate.FindStoredResource(resource.NeededResource).Amount;
                 }
-                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
+                Need.LastProductionMeet = TotalResourcesFulfillmentRate / Need.ResourcesToFulfillNeeded.Count;
             }
             //-------
 
@@ -119,12 +111,12 @@ namespace Economics {
             //------- Army
             foreach (ConsumptionNeed Need in ArmyNeeds)
             { //getting average fulfillment of required resources
-                float TotalResourcesNeed = 0;
-                foreach (var ResourcesNeeded in Need.ResourcesToFulfillNeeded)
+                float TotalResourcesFulfillmentRate = 0;
+                foreach (var resource in Need.ResourcesToFulfillNeeded)
                 {
-                    TotalResourcesNeed = ProductionToConsumptionRate[ResourcesNeeded.Item1.ID];
+                    TotalResourcesFulfillmentRate += ProductionToConsumptionRate.FindStoredResource(resource.NeededResource).Amount;
                 }
-                Need.LastProductionMeet = TotalResourcesNeed / Need.ResourcesToFulfillNeeded.Count;
+                Need.LastProductionMeet = TotalResourcesFulfillmentRate / Need.ResourcesToFulfillNeeded.Count;
             }
         }
         public void Transport()

@@ -1,0 +1,7 @@
+1. Game precalculates possible trading routes for each province to the list and sorts it by the distance
+
+2. Trading cycle: for i = minimalPossibleDistance; i <= maximumPossibleDistance {
+	trade being calculated towards each province of i distance }
+
+
+Precalculation are not perfomed each trade cycle

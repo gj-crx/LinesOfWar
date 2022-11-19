@@ -5,8 +5,9 @@ using UnityEngine;
 
 namespace Economics
 {
+    [CreateAssetMenu(fileName = "Resource", menuName = "ScriptableObjects/Resource", order = 1)]
     [Serializable]
-    public class Resource
+    public class Resource : ScriptableObject
     {
         public int ID = 0;
         public string ResourceName = "Grain";

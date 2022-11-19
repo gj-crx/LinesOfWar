@@ -4,8 +4,9 @@ using UnityEngine;
 
 namespace Economics
 {
+    [CreateAssetMenu(fileName = "Production unit", menuName = "ScriptableObjects/Production unit", order = 3)]
     [System.Serializable]
-    public class ProductionUnit
+    public class ProductionUnit : ScriptableObject
     {
         public string ProductionUnitName = "Farmlands";
         public float MaximumWorkers = 1000;

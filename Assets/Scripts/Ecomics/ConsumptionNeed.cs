@@ -9,41 +9,30 @@ namespace Economics
     /// Represent a need of certain resources for population / industry / logistics / army
     /// </summary>
     [System.Serializable]
-    public class ConsumptionNeed
+    [CreateAssetMenu(fileName = "Consumption need", menuName = "ScriptableObjects/Consumption need", order = 4)]
+    public class ConsumptionNeed : ScriptableObject
     { 
         public string NeedName = "Food";
 
         /// <summary>
         /// Indicates how much of this need was meet from 0.0 to 1.0
         /// </summary>
+        [HideInInspector]
         public float LastProductionMeet = 1;
 
-        public List<Tuple<Resource, float>> ResourcesToFulfillNeeded = new List<Tuple<Resource, float>>();
-
-        [SerializeField]
-        private List<string> resourcesToFulfillNeededInspectorBuilder = new List<string>();
-        [SerializeField]
-        private List<float> resourcesToFulfillAmountInspectorBuilder = new List<float>();
+        public List<ResourceAmount> ResourcesToFulfillNeeded = new List<ResourceAmount>();
 
 
-        public ConsumptionNeed()
+
+        public static void SubstractListOfNeeds(List<ConsumptionNeed> needsList, float consumersAmount, ResourcesStorage storageToSubstract)
         {
-            for (int i = 0; i < resourcesToFulfillNeededInspectorBuilder.Count; i++)
+            foreach (var Need in needsList)
             {
-                ResourcesToFulfillNeeded.Add(new Tuple<Resource, float>(GameManager.types.GetResourceTypeByName(resourcesToFulfillNeededInspectorBuilder[i]), resourcesToFulfillAmountInspectorBuilder[i]));
-            }
-        }
-
-        public static float[] CalculateConsumptionAmount(List<ConsumptionNeed> NeedsList, float UsersAmount, float[] ResourcesToDistract)
-        {
-            foreach (var Need in NeedsList)
-            {
-                foreach (var Resource in Need.ResourcesToFulfillNeeded)
+                foreach (var substracted in Need.ResourcesToFulfillNeeded)
                 {
-                    ResourcesToDistract[Resource.Item1.ID] -= Resource.Item2 * UsersAmount;
+                    storageToSubstract.Substract(substracted.NeededResource, substracted.Amount * consumersAmount);
                 }
             }
-            return ResourcesToDistract;
         }
 
         public enum CategoryOfNeed : byte

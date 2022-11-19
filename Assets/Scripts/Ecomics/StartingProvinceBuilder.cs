@@ -12,7 +12,7 @@ namespace Economics
         public void CreateStartingAssetsInProvince(Province ProvinceToBuild)
         {
             ProvinceToBuild.Population = Random.Range(100, StartingMaxPopulation);
-            CreateStartingProductionUnits(ProvinceToBuild);
+
         }
 
         private void CreateStartingProductionUnits(Province ProvinceToBuild)
